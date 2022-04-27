@@ -52,7 +52,7 @@ class InstagramHandler:
             media = self.__cl.photo_upload(paths[0], caption=caption, usertags=user_tag, location=location)
 
         if type_post == 2:
-            media = self.__cl.photo_upload(paths[0], caption=caption, usertags=user_tag, location=location)
+            media = self.__cl.video_upload(paths[0], caption=caption, usertags=user_tag, location=location)
 
         if type_post == 8:
             media = self.__cl.album_upload(paths, caption=caption, usertags=user_tag, location=location)
