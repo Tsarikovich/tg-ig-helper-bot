@@ -1,0 +1,31 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <value>
+          <list size="11">
+            <item index="0" class="java.lang.String" itemvalue="dlib" />
+            <item index="1" class="java.lang.String" itemvalue="ujson" />
+            <item index="2" class="java.lang.String" itemvalue="lib" />
+            <item index="3" class="java.lang.String" itemvalue="keras" />
+            <item index="4" class="java.lang.String" itemvalue="tensorflow" />
+            <item index="5" class="java.lang.String" itemvalue="matplotlib" />
+            <item index="6" class="java.lang.String" itemvalue="numpy" />
+            <item index="7" class="java.lang.String" itemvalue="requests" />
+            <item index="8" class="java.lang.String" itemvalue="TwoCaptcha" />
+            <item index="9" class="java.lang.String" itemvalue="opencv_python" />
+            <item index="10" class="java.lang.String" itemvalue="pyTelegramBotAPI" />
+          </list>
+        </value>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyStubPackagesAdvertiser" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <list>
+          <option value="PyQt5-stubs==5.13.1.4" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
