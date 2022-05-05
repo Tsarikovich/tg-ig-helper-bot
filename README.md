@@ -1,6 +1,8 @@
 # tg-ig-helper-bot
 Telegram bot for handling <b>multiple</b> instagram accounts with
 <b>automated liking/following/commenting activity.</b>
+<br>
+See video short version of working https://drive.google.com/file/d/18qGIv-s4hYP1zJDWw_GdmuubSpPpLJbS/view
 
 ## Intro
 
@@ -59,6 +61,7 @@ with the limits which I've set.
 
 
 #####################################
+<br>
 With that algorithm you don't need to scrape again and again new people to interact with.
 Bot does it itself. You just set limits and also you could add new 
 influencer accounts to scrape its auditory!
