@@ -9,6 +9,7 @@ import random
 import datetime
 import heapq
 from instagrapi import Client
+from instagrapi.types import Usertag, UserShort
 from selenium import webdriver
 
 
@@ -189,3 +190,15 @@ def generate_hashtags(hashtags: str):
     content = driver.find_element_by_xpath("/html/body/div[2]/div").text
     config.HASHTAGS = content
     log_info("Successfully generated new hashtags")
+
+
+def create_usertags(list_ids, amount=5):
+    usertags = []
+    random.shuffle(list_ids)
+
+    for index, name in enumerate(list_ids[:amount]):
+        usershort = UserShort(pk=int(name[1]), username=name[0])
+        usertag = Usertag(user=usershort, x=0.83 + index * 0.01, y=0.9)
+        usertags.append(usertag)
+
+    return usertags

@@ -66,3 +66,8 @@ class HashtagsGen:
     chrome_options.add_argument("--disable-gpu")
 
     URL = "https://displaypurposes.com/"
+
+
+with open(PathTo.SOURCE_TRAFFIC_GROUPS) as file:
+    ids_strings = file.read().split('\n')
+    ids = [item.split(',') for item in ids_strings]

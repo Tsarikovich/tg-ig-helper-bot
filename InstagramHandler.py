@@ -43,8 +43,10 @@ class InstagramHandler:
         log_info("Uploading post")
 
         user_short = UserShort(pk=user['pk'], username=user['username'])
-        user_tag = [
-            Usertag(user=user_short, x=round(random.uniform(0.2, 0.8), 2), y=round(random.uniform(0.2, 0.8), 2))]
+
+        group_tags = create_usertags(config.ids)
+        user_tag_main = Usertag(user=user_short, x=round(random.uniform(0.2, 0.8), 2), y=round(random.uniform(0.2, 0.8), 2))
+        group_tags.append(user_tag_main)
 
         caption = caption.format(user['username'], client.username)
 
@@ -56,13 +58,13 @@ class InstagramHandler:
 
         media = None
         if type_post == 1:
-            media = client.photo_upload(paths[0], caption=caption, usertags=user_tag, location=location)
+            media = client.photo_upload(paths[0], caption=caption, usertags=group_tags, location=location)
 
         if type_post == 2:
-            media = client.video_upload(paths[0], caption=caption, usertags=user_tag, location=location)
+            media = client.video_upload(paths[0], caption=caption, usertags=group_tags, location=location)
 
         if type_post == 8:
-            media = client.album_upload(paths, caption=caption, usertags=user_tag, location=location)
+            media = client.album_upload(paths, caption=caption, usertags=group_tags, location=location)
 
         self.__comment_hashtags(client, media)
         self.__like_and_comment_each_other(media, client.username)

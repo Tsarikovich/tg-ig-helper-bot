@@ -70,7 +70,7 @@ def get_caption(message):
 @bot.message_handler(commands=['generate_hashtags'])
 def set_hashtags(message):
     if message.from_user.id == config.ID_TELEGRAM_CHAT:
-        msg = bot.send_message(message.from_user.id, text="Enter a few template hashtags:")
+        msg = bot.send_message(message.from_user.id, text="Eter a few template hashtags:")
         bot.register_next_step_handler(msg, get_hashtags)
 
 
