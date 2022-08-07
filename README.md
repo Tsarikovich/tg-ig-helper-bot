@@ -54,7 +54,7 @@ From groups we grab <b>followers, last post likers and people, who tagged
 them with that group.</b>
 <br>
 <br> From people we grab the same except who tagged these people on their pages, because
-this tags mostly do these "fashion-inspiration groups"
+these tags mostly do these "fashion-inspiration groups"
 
 And after that accounts starting live their own life liking, following and commenting people
 with the limits which I've set.
