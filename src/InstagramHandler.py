@@ -1,6 +1,7 @@
 from instagrapi.types import Usertag, UserShort, Location
-
+import ig_bot_settings
 from helping_functions import *
+from config import logger
 
 
 class InstagramHandler:
@@ -12,7 +13,7 @@ class InstagramHandler:
 
         log_info("Signing into accounts")
         for account in json_cred:
-            self.__clients[json_cred[account]['login']] = {"client": Client(), "is_posting": False}
+            self.__clients[json_cred[account]['login']] = {"client": Client(), "is_posting": False, 'active': False}
             self.__clients[json_cred[account]['login']]["client"].login(json_cred[account]['login'],
                                                                         json_cred[account]['password'])
 
@@ -45,7 +46,8 @@ class InstagramHandler:
         user_short = UserShort(pk=user['pk'], username=user['username'])
 
         group_tags = create_usertags(config.ids)
-        user_tag_main = Usertag(user=user_short, x=round(random.uniform(0.2, 0.8), 2), y=round(random.uniform(0.2, 0.8), 2))
+        user_tag_main = Usertag(user=user_short, x=round(random.uniform(0.2, 0.8), 2),
+                                y=round(random.uniform(0.2, 0.8), 2))
         group_tags.append(user_tag_main)
 
         caption = caption.format(user['username'], client.username)
@@ -74,7 +76,7 @@ class InstagramHandler:
 
     def __comment_hashtags(self, client, media):
         log_info("Commenting hashtags")
-        client.media_comment(media.dict()['id'], config.HASHTAGS)
+        client.media_comment(media.dict()['id'], ig_bot_settings.HASHTAGS)
 
     def __like_and_comment_each_other(self, media, current_account):
         log_info("Liking and commenting each other")
@@ -83,7 +85,7 @@ class InstagramHandler:
             if client_name != current_account:
                 curr_client = self.__clients[client_name]["client"]
                 curr_client.media_like(media.id)
-                curr_client.media_comment(media.id, random.choice(config.COMMENTS_TEMPLATES))
+                curr_client.media_comment(media.id, random.choice(ig_bot_settings.COMMENTS_TEMPLATES))
 
     def public_activity(self):
         schedules = {}
@@ -92,10 +94,10 @@ class InstagramHandler:
         for client in self.__clients:
             schedules[client] = calculate_schedule_activity()
             scrapped_users[client] = scrape_users(client)
+            client['active'] = True
 
-        dates_list_not_empty = True
+        while any(self.__clients[account]['active'] for account in schedules):
 
-        while dates_list_not_empty:
             for account in schedules:
                 if self.__clients[account]["is_posting"]:
                     continue
@@ -110,12 +112,13 @@ class InstagramHandler:
                     newest_date_comment = schedules[account]['comment'][0]
 
                 if not newest_date_follow and not newest_date_like and not newest_date_comment:
-                    dates_list_not_empty = False
+                    self.__clients[account]['active'] = False
                     break
 
                 if newest_date_follow and datetime.datetime.now() > newest_date_follow:
                     user_id = scrapped_users[account].pop()
                     self.__clients[account]["client"].user_follow(user_id)
+                    logger.info()
                     self.output.write(user_id + "\n")
                     heapq.heappop(schedules[account]['follow'])
 
@@ -134,8 +137,7 @@ class InstagramHandler:
 
                     user_media = self.__clients[account]["client"].user_medias(user_id=int(user_id), amount=1)
                     self.__clients[account]["client"].media_comment(user_media[0].id,
-                                                                    text=random.choice(config.COMMENTS_TEMPLATES))
+                                                                    text=random.choice(
+                                                                        ig_bot_settings.COMMENTS_TEMPLATES))
                     self.output.write(user_id + "\n")
                     heapq.heappop(schedules[account]['comment'])
-
-            time.sleep(60)

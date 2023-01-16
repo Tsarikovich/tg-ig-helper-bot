@@ -8,9 +8,9 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from seleniumwire import webdriver
 
-import config
+from src import config
 from reports_list import reports_groups
-from config import logger, SELENIUMWIRE_OPTIONS, USERAGENTS
+from src.config import logger, SELENIUMWIRE_OPTIONS, USERAGENTS
 
 
 class LimitException(Exception):

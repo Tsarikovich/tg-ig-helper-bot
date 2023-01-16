@@ -1,11 +1,11 @@
 import telebot
 from telebot import types
-import config
-import helping_functions
-from InstagramHandler import InstagramHandler
+from src import helping_functions, config, ig_bot_settings
+from src.InstagramHandler import InstagramHandler
 import os
-import setConfig
-from helping_functions import get_account_names
+
+
+from src.helping_functions import get_account_names
 
 URL_TYPE_REGEXP = r"/https?:\/\/w{0,3}\w*?\.(\w*?\.)?\w{2,3}\S*|www\.(\w*?\.)?\w*?\.\w{2,3}\S*|(\w*?\.)?\w*?\.\w{2," \
                   r"3}[\/\?]\S*/ "
@@ -41,6 +41,7 @@ def show_current_account(message):
         else:
             bot.send_message(message.chat.id, text="No account is selected")
 
+
 @bot.message_handler(regexp=URL_TYPE_REGEXP)
 def process_url(message):
     if message.from_user.id == config.ID_TELEGRAM_CHAT:
@@ -55,9 +56,9 @@ def get_caption(message):
     caption = message.text
 
     if caption != "-":
-        caption = "\n".join([caption, config.CAPTION])
+        caption = "\n".join([caption, ig_bot_settings.CAPTION])
     else:
-        caption = config.CAPTION
+        caption = ig_bot_settings.CAPTION
 
     try:
         bot.send_message(message.from_user.id, "Creating post...")
@@ -76,14 +77,14 @@ def set_hashtags(message):
 
 def get_hashtags(message):
     helping_functions.generate_hashtags(message.text)
-    bot.send_message(message.from_user.id, f"Generated new hashtags: \n{config.HASHTAGS}")
+    bot.send_message(message.from_user.id, f"Generated new hashtags: \n{ig_bot_settings.HASHTAGS}")
 
 
 @bot.message_handler(commands=['templates'])
 def show_templates(message):
     if message.from_user.id == config.ID_TELEGRAM_CHAT:
-        templates = "\n".join(["Hashtags:", config.HASHTAGS])
-        templates = "\n".join([templates, "Caption template:", config.CAPTION])
+        templates = "\n".join(["Hashtags:", ig_bot_settings.HASHTAGS])
+        templates = "\n".join([templates, "Caption template:", ig_bot_settings.CAPTION])
 
         bot.send_message(message.from_user.id, text=templates)
 
@@ -93,6 +94,7 @@ def start_activity(message):
     if message.from_user.id == config.ID_TELEGRAM_CHAT:
         bot.send_message(message.from_user.id, text="Oh, let's go...")
         ig_handler.public_activity()
+
 
 if __name__ == '__main__':
     bot.polling()

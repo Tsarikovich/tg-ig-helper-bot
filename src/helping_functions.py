@@ -11,6 +11,7 @@ import heapq
 from instagrapi import Client
 from instagrapi.types import Usertag, UserShort
 from selenium import webdriver
+import ig_bot_settings
 
 
 def log_info(data):
@@ -52,30 +53,27 @@ def get_account_names():
 def calculate_schedule_activity():
     log_info("Calculating schedule activity")
 
-    today_follows_amount = random.randint(config.ACCOUNTS_TO_FOLLOW_PER_DAY[0],
-                                          config.ACCOUNTS_TO_FOLLOW_PER_DAY[1])
-    today_likes_amount = random.randint(config.ACCOUNTS_TO_LIKE_PER_DAY[0],
-                                        config.ACCOUNTS_TO_LIKE_PER_DAY[1])
-    today_comments_amount = random.randint(config.ACCOUNTS_TO_COMMENT_PER_DAY[0],
-                                           config.ACCOUNTS_TO_COMMENT_PER_DAY[1])
+    today_follows_amount = random.randint(ig_bot_settings.ACCOUNTS_TO_FOLLOW_PER_DAY[0],
+                                          ig_bot_settings.ACCOUNTS_TO_FOLLOW_PER_DAY[1])
+    today_likes_amount = random.randint(ig_bot_settings.ACCOUNTS_TO_LIKE_PER_DAY[0],
+                                        ig_bot_settings.ACCOUNTS_TO_LIKE_PER_DAY[1])
+    today_comments_amount = random.randint(ig_bot_settings.ACCOUNTS_TO_COMMENT_PER_DAY[0],
+                                           ig_bot_settings.ACCOUNTS_TO_COMMENT_PER_DAY[1])
 
     start_date = datetime.datetime.today()
     follow_time, likes_time, comments_time = [], [], []
 
     for i in range(today_follows_amount):
         follow_time.append(
-            start_date + datetime.timedelta(minutes=random.randrange(60 * config.ScrapeSettings.HOURS_TO_WORK),
-                                            seconds=random.randrange(60)))
+            start_date + datetime.timedelta(seconds=random.randrange(60 * 60 * ig_bot_settings.HOURS_TO_WORK)))
 
     for i in range(today_likes_amount):
         likes_time.append(
-            start_date + datetime.timedelta(minutes=random.randrange(60 * config.ScrapeSettings.HOURS_TO_WORK),
-                                            seconds=random.randrange(60)))
+            start_date + datetime.timedelta(seconds=random.randrange(60 * 60 * ig_bot_settings.HOURS_TO_WORK)))
 
     for i in range(today_comments_amount):
         comments_time.append(
-            start_date + datetime.timedelta(minutes=random.randrange(60 * config.ScrapeSettings.HOURS_TO_WORK),
-                                            seconds=random.randrange(60)))
+            start_date + datetime.timedelta(seconds=random.randrange(60 * 60 * ig_bot_settings.HOURS_TO_WORK)))
 
     return {"follow": heapq.heapify(follow_time), "like": heapq.heapify(likes_time),
             "comment": heapq.heapify(comments_time)}
@@ -101,66 +99,49 @@ def load_data():
     return used_users, people_ids, group_ids
 
 
-def scrape_from_groups(client, group_ids, used_users, scrapped_users):
-    log_info("Scrapping from groups")
-    random.shuffle(group_ids)
-    for i, group_id in enumerate(group_ids[:config.ScrapeSettings.GROUPS_TO_CHECK]):
-        log_info(f"{i + 1} group scrapping")
+def scrape_by_source(client, ids, used_users, scrapped_users, source=1):
+    log_info(f"Scrapping from {'groups' if source else 'people'}")
+    random.shuffle(ids)
+
+    for i, group_id in enumerate(
+            ids[:(ig_bot_settings.GROUPS_TO_CHECK if source else ig_bot_settings.PEOPLE_TO_CHECK)]):
+        log_info(f"{i + 1} {'group' if source else 'people'} scrapping")
         # Parse followers
         followers = client.user_followers(user_id=group_id,
-                                          amount=config.ScrapeSettings.NUM_TO_REQUEST_PER_CATEGORY_GROUPS)
+                                          amount=(ig_bot_settings.NUM_TO_REQUEST_PER_CATEGORY_GROUPS if source else
+                                                  ig_bot_settings.NUM_TO_REQUEST_PER_CATEGORY_PEOPLE))
         for id_ in followers:
             if id_ not in used_users:
-                scrapped_users.add(id_)
+                scrapped_users.add((id_, followers[id_].username))
 
         time.sleep(3)
-        # Parse likers of newest post
+        # Parse likers of the newest post
         group_media = client.user_medias(user_id=int(group_id), amount=1)
         if len(group_media) > 0:
             likers = client.media_likers(group_media[0].id)
-            likers = likers[:min(config.ScrapeSettings.NUM_TO_REQUEST_PER_CATEGORY_GROUPS, len(likers))]
-            for id_ in likers:
-                if id_ not in used_users:
-                    scrapped_users.add(id_.pk)
+            likers = likers[:min(
+                (
+                    ig_bot_settings.NUM_TO_REQUEST_PER_CATEGORY_GROUPS if source
+                    else ig_bot_settings.NUM_TO_REQUEST_PER_CATEGORY_PEOPLE),
+                len(likers))]
+
+            for user in likers:
+                if user not in used_users:
+                    scrapped_users.add((user.pk, user.username))
 
         time.sleep(3)
-        # Parse taggers
-        medias = client.usertag_medias(user_id=int(group_id), amount=15)
-        if len(medias) > 0:
-            medias = random.sample(medias,
-                                   min(config.ScrapeSettings.NUM_TO_REQUEST_PER_CATEGORY_GROUPS, len(medias)))
-            for media in medias:
-                if media.user.pk not in used_users:
-                    scrapped_users.add(media.user.pk)
-        time.sleep(10)
-
-    return scrapped_users
-
-
-def scrape_from_people(client, people_ids, used_users, scrapped_users):
-    log_info("Scrapping from people")
-    random.shuffle(people_ids)
-    for i, people_id in enumerate(people_ids[:config.ScrapeSettings.PEOPLE_TO_CHECK]):
-        log_info(f"{i + 1} people scrapping")
-        # Parse followers
-        followers = client.user_followers(user_id=people_id,
-                                          amount=config.ScrapeSettings.NUM_TO_REQUEST_PER_CATEGORY_PEOPLE)
-        for id_ in followers:
-            if id_ not in used_users:
-                scrapped_users.add(id_)
-
-        time.sleep(3)
-
-        # Parse likers of newest post
-        people_media = client.user_medias(user_id=int(people_id), amount=1)
-        if len(people_id) > 0:
-            likers = client.media_likers(people_media[0].id)
-            likers = likers[:min(config.ScrapeSettings.NUM_TO_REQUEST_PER_CATEGORY_PEOPLE, len(likers))]
-            for id_ in likers:
-                if id_ not in used_users:
-                    scrapped_users.add(id_.pk)
+        if source:
+            # Parse taggers
+            medias = client.usertag_medias(user_id=int(group_id), amount=15)
+            if len(medias) > 0:
+                medias = random.sample(medias,
+                                       min(ig_bot_settings.NUM_TO_REQUEST_PER_CATEGORY_GROUPS + 5, len(medias)))
+                for media in medias:
+                    if media.user.pk not in used_users:
+                        scrapped_users.add((media.user.pk, media.user.username))
 
         time.sleep(10)
+
     return scrapped_users
 
 
@@ -170,9 +151,9 @@ def scrape_users(client: Client):
     used_users, people_ids, group_ids = load_data()
     scrapped_users = set()
 
-    scrapped_users = scrape_from_groups(client, group_ids, used_users, scrapped_users)
-    time.sleep(60)
-    scrapped_users = scrape_from_people(client, people_ids, used_users, scrapped_users)
+    scrapped_users = scrape_by_source(client, group_ids, used_users, scrapped_users)
+    time.sleep(120)
+    scrapped_users = scrape_by_source(client, people_ids, used_users, scrapped_users, 0)
 
     log_info("Scrapping successfully")
     return scrapped_users
