@@ -3,7 +3,7 @@ import os
 import telebot
 from src import config, helping_functions, ig_bot_settings
 from src.helping_functions import get_account_names
-from src.InstagramHandler import InstagramHandler
+from src.instagram_handler import InstagramHandler
 from telebot import types
 
 
