@@ -1,6 +1,7 @@
 __pycache__/
 .idea
-src/useragents.txt
+useragents.txt
 src/credentials.json
 src/logins.txt
 run.bat
+.env

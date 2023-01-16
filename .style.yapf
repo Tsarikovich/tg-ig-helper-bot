@@ -1,0 +1,6 @@
+[style]
+based_on_style = pep8
+dedent_closing_brackets = True
+split_arguments_when_comma_terminated = True
+column_limit = 79
+allow_split_before_dict_value = False
